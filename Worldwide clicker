@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Worldwide Click Counter</title>
+</head>
+<body>
+  <h1>Worldwide Click Counter</h1>
+  <button id="clickBtn">Click me!</button>
+  <p>Local Clicks: <span id="localCount">0</span></p>
+  <p>Global Clicks: <span id="globalCount">...</span></p>
+
+  <script>
+    let localCount = 0;
+
+    async function updateGlobal() {
+      const res = await fetch('http://localhost:3000/count');
+      const data = await res.json();
+      document.getElementById('globalCount').textContent = data.count;
+    }
+
+    document.getElementById('clickBtn').onclick = async function() {
+      localCount++;
+      document.getElementById('localCount').textContent = localCount;
+      await fetch('http://localhost:3000/click', { method: 'POST' });
+      updateGlobal();
+    };
+
+    // Update on load
+    updateGlobal();
+  </script>
+</body>
+</html>
