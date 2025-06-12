@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Worldwide Click Counter v5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* --- Animated gradient and animated blobs --- */
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+      overflow-x: hidden;
+      position: relative;
+    }
+    .bg-blobs {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.4;
+      filter: blur(30px);
+      animation: moveBlobs 18s infinite alternate cubic-bezier(0.7,0.2,0.3,0.9);
+      will-change: transform;
+    }
+    .blob1 {
+      width: 420px; height: 420px;
+      background: linear-gradient(135deg, #ffd6e0 0%, #ffb86c 100%);
+      left: 5vw; top: 10vh;
+      animation-delay: 0s;
+    }
+    .blob2 {
+      width: 400px; height: 400px;
+      background: linear-gradient(135deg, #80ffea 0%, #8f94fb 100%);
+      left: 60vw; top: 30vh;
+      animation-delay: 4s;
+    }
+    .blob3 {
+      width: 340px; height: 340px;
+      background: linear-gradient(135deg, #b5fffc 0%, #ff61a6 100%);
+      left: 35vw; top: 70vh;
+      animation-delay: 8s;
+    }
+    @keyframes moveBlobs {
+      0% { transform: scale(1) translateY(0) translateX(0);}
+      40% { transform: scale(1.08) translateY(-30px) translateX(60px);}
+      70% { transform: scale(0.95) translateY(40px) translateX(-60px);}
+      100% { transform: scale(1.05) translateY(-10px) translateX(30px);}
+    }
+    .counter-card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.93);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.22);
+      border-radius: 28px;
+      padding: 2.5rem 2.5rem 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 320px;
+      max-width: 95vw;
+      margin: 1rem auto 2.2rem auto;
+      animation: fadeIn 1.3s cubic-bezier(0.35, 0.85, 0.35, 1.2);
+      z-index: 1;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px) scale(0.96);}
+      to { opacity: 1; transform: translateY(0) scale(1);}
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      color: #4e54c8;
+      text-shadow: 1px 2px 7px rgba(80,80,180,0.1);
+      letter-spacing: 1px;
+      animation: fadeIn 1.1s 0.15s both;
+    }
+    .current-rank {
+      font-size: 1.17rem;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(90deg,#4e54c8 50%,#8f94fb 100%);
+      padding: 0.5em 1.5em;
+      border-radius: 16px;
+      margin-bottom: 0.9em;
+      margin-top: 0.2em;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px #8f94fb44;
+      animation: fadeIn 1s cubic-bezier(0.3,1,0.5,1.2);
+      transition: background 0.3s;
+      display: inline-block;
+    }
+    .counter-value, .count-num {
+      font-size: 2.7rem;
+      font-weight: bold;
+      color: #222;
+      margin: 0.7rem 0 0.2rem 0;
+      letter-spacing: 2px;
+      text-align: center;
+      text-shadow: 0 2px 8px rgba(80,80,180,0.08);
+      user-select: all;
+      transition: color 0.2s;
+    }
+    .counter-label {
+      font-size: 1.1rem;
+      color: #6a6fc8;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin-top: 1.2rem;
+      animation: fadeIn 1.1s 0.45s both;
+    }
+    #clickBtn {
+      background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 999px;
+      padding: 0.9em 2.2em;
+      margin: 1.25rem 0 1.8rem 0;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(80,80,180,0.10);
+      transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+      outline: none;
+      animation: btnPopIn 0.75s 0.12s both cubic-bezier(0.3,0.8,0.5,1.2);
+      position: relative;
+      z-index: 9;
+    }
+    @keyframes btnPopIn {
+      from { opacity: 0; transform: scale(0.7);}
+      to { opacity: 1; transform: scale(1);}
+    }
+    #clickBtn:active {
+      animation: btnPulse 0.3s;
+    }
+    @keyframes btnPulse {
+      0% { transform: scale(1);}
+      55% { transform: scale(1.13);}
+      100% { transform: scale(1);}
+    }
+    #clickBtn:hover, #clickBtn:focus {
+      background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 8px 18px rgba(80,80,180,0.18);
+    }
+    .counts-container {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    .count-box {
+      background: rgba(200, 210, 255, 0.13);
+      border-radius: 14px;
+      padding: 1rem 1.5rem;
+      min-width: 120px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(150,150,200,0.07);
+      transition: background 0.4s;
+      animation: fadeIn 1.2s 0.3s both;
+    }
+    .count-title {
+      font-size: 1rem;
+      color: #4e54c8;
+      margin-bottom: 0.18rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    .count-num {
+      font-size: 1.7rem;
+      font-family: monospace;
+      color: #333;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+    .your-country {
+      color: #6a6fc8;
+      font-size: 1.08rem;
+      margin-top: 0.3rem;
+      text-align: center;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      animation: fadeIn 1.2s 0.22s both;
+    }
+    .leaderboard, .countries-table {
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+      background: rgba(255,255,255,0.90);
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(50,50,100,0.07);
+      overflow: hidden;
+      animation: fadeIn 1.3s 0.5s both;
+    }
+    .leaderboard-title {
+      background: #4e54c8;
+      color: #fff;
+      font-weight: bold;
+      padding: 0.6rem 1.2rem;
+      font-size: 1.15rem;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+    }
+    th, td {
+      padding: 0.55rem 0.7rem;
+      text-align: left;
+      transition: background 0.2s;
+    }
+    th {
+      background: #f0f1fa;
+      color: #4e54c8;
+    }
+    tr:nth-child(even) { background: #f9fafd; }
+    tr { transition: background 0.3s; }
+    tr:hover { background: #f0ebff; }
+    .country-select {
+      margin-bottom: 1.3rem;
+      font-size: 1.08rem;
+      padding: 0.3em 1em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      box-shadow: 0 1px 3px rgba(60,60,120,0.07);
+      background: #fff;
+      color: #454545;
+      transition: border 0.2s;
+    }
+    .country-select:focus {
+      border: 1.5px solid #4e54c8;
+      box-shadow: 0 2px 7px #8f94fb55;
+    }
+    .footer {
+      margin-top: 2.3rem;
+      color: #f7f7fb;
+      font-size: 1rem;
+      text-align: center;
+      opacity: 0.93;
+      text-shadow: 0 1px 6px rgba(31, 38, 135, 0.22);
+      z-index: 2;
+      position: relative;
+      animation: fadeIn 1.6s 0.7s both;
+    }
+    /* --- SHOP ICON & MODAL --- */
+    .shop-icon {
+      position: absolute;
+      top: 6px;
+      right: 16px;
+      width: 38px;
+      height: 38px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(80,80,180,0.11);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 30;
+      transition: box-shadow 0.2s, background 0.2s;
+      border: 2px solid #4e54c8;
+    }
+    .shop-icon:hover {
+      box-shadow: 0 8px 18px #8f94fb55;
+      background: #f7f7fb;
+    }
+    .shop-icon svg { width: 24px; height: 24px; fill: #4e54c8; }
+    .shop-modal-bg {
+      position: fixed;
+      z-index: 40;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(60,70,140,0.20);
+      display: none;
+      align-items: center; justify-content: center;
+      animation: fadeIn 0.3s;
+    }
+    .shop-modal-bg.active { display: flex; }
+    .shop-modal {
+      background: #fff;
+      border-radius: 22px;
+      box-shadow: 0 14px 60px #4e54c825;
+      padding: 2rem 1.5rem 1.6rem 1.5rem;
+      min-width: 310px;
+      max-width: 94vw;
+      animation: fadeIn 0.4s;
+      position: relative;
+    }
+    .shop-close {
+      position: absolute;
+      top: 9px; right: 13px;
+      font-size: 1.4em;
+      color: #4e54c8;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+      background: none;
+      transition: color 0.16s;
+    }
+    .shop-close:hover { color: #ff4d6d; }
+    .shop-title {
+      font-size: 1.43rem;
+      font-weight: bold;
+      color: #4e54c8;
+      margin-bottom: 1.2rem;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .shop-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1em;
+      border-bottom: 1px solid #ecebff;
+      padding-bottom: 0.7em;
+    }
+    .shop-item:last-child { border-bottom: none; }
+    .shop-item-labels {
+      display: flex; flex-direction: column;
+    }
+    .shop-rank {
+      font-weight: bold;
+      font-size: 1.12em;
+      color: #4e54c8;
+    }
+    .shop-cost {
+      font-size: 0.98em;
+      color: #888;
+      font-style: italic;
+      margin-top: 2px;
+    }
+    .shop-btn {
+      padding: 0.50em 1.1em;
+      border-radius: 8px;
+      border: none;
+      background: #4e54c8;
+      color: #fff;
+      font-weight: 500;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      margin-left: 1em;
+    }
+    .shop-btn[disabled] { background: #aaa; cursor: not-allowed; }
+    .shop-btn.equipped {
+      background: #8f94fb;
+      color: #222;
+      cursor: pointer;
+      font-weight: bold;
+      border: 1.5px solid #4e54c8;
+    }
+    .shop-inventory-title {
+      color: #4e54c8;
+      font-weight: 500;
+      margin-top: 1.6em;
+      margin-bottom: 0.4em;
+      font-size: 1.08em;
+    }
+    .shop-inventory {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7em;
+      margin-bottom: 0.4em;
+    }
+    .shop-inv-rank {
+      background: #f0f1fa;
+      color: #4e54c8;
+      font-weight: 520;
+      border-radius: 7px;
+      padding: 0.26em 0.9em;
+      font-size: 1em;
+      border: 1.5px solid #8f94fb;
+      cursor: pointer;
+      transition: background 0.13s, color 0.13s;
+    }
+    .shop-inv-rank.equipped {
+      background: #4e54c8;
+      color: #fff;
+      border: 2.5px solid #8f94fb;
+    }
+    .shop-desc {
+      font-size: 0.98em;
+      color: #555;
+      margin-bottom: 0.18em;
+    }
+    @media (max-width: 600px) {
+      .counter-card { padding: 1.2rem; }
+      h1 { font-size: 1.3rem; }
+      .counter-value { font-size: 1.5rem; }
+      #clickBtn { font-size: 1rem; padding: 0.7em 1.4em; }
+      .counts-container { gap: 1rem; }
+      .footer { font-size: 0.85rem; }
+      .leaderboard, .countries-table { font-size: 0.87rem; }
+      th, td { padding: 0.33rem 0.4rem; }
+      .shop-modal { min-width: 92vw; }
+      .shop-icon { right: 8px; top: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated Blobs -->
+  <div class="bg-blobs">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+  </div>
+  <div class="counter-card">
+    <h1>Worldwide Click Counter v5 🌐</h1>
+    <label>
+      <span style="color:#4e54c8;font-weight:500;">Select your country:</span>
+      <select id="countrySelect" class="country-select"></select>
+    </label>
+    <span class="current-rank" id="currentRankLabel"></span>
+    <button id="clickBtn">Click me!</button>
+    <div class="your-country" id="yourCountry"></div>
+    <div class="counts-container">
+      <div class="count-box">
+        <div class="count-title">Your Clicks</div>
+        <div class="count-num" id="localCount">0</div>
+      </div>
+      <div class="count-box">
+        <div class="count-title">Global Clicks</div>
+        <div class="count-num" id="globalCount">...</div>
+      </div>
+    </div>
+    <div class="counter-label">Every click you make is added to your country and the global total. 🌍</div>
+    <div class="shop-icon" id="shopIcon" title="Open Shop" style="position:absolute;top:10px;right:10px;">
+      <svg viewBox="0 0 24 24"><path d="M7 7V6a5 5 0 0 1 10 0v1h2a1 1 0 0 1 1 1v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a1 1 0 0 1 1-1h2zm2 0h6V6a3 3 0 0 0-6 0v1zm-4 2v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9H5z"/></svg>
+    </div>
+  </div>
+  <div class="leaderboard">
+    <div class="leaderboard-title">🌏 Top 20 Countries</div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Country</th><th>Clicks</th></tr>
+      </thead>
+      <tbody id="leaderboardBody"></tbody>
+    </table>
+  </div>
+  <div class="countries-table">
+    <div class="leaderboard-title">All Countries</div>
+    <table>
+      <thead>
+        <tr><th>Country</th><th>Clicks</th></tr>
+      </thead>
+      <tbody id="countriesBody"></tbody>
+    </table>
+  </div>
+  <div class="shop-modal-bg" id="shopModalBg">
+    <div class="shop-modal">
+      <button class="shop-close" id="shopCloseBtn">&times;</button>
+      <div class="shop-title">🛒 Ranks Store</div>
+      <div class="shop-item">
+        <div class="shop-item-labels">
+          <span class="shop-rank">Member</span>
+          <span class="shop-cost">Free (already owned)</span>
+        </div>
+        <button class="shop-btn equipped" disabled>Equipped</button>
+      </div>
+      <div class="shop-item">
+        <div class="shop-item-labels">
+          <span class="shop-rank">Clicker</span>
+          <span class="shop-cost">100 Clicks</span>
+        </div>
+        <button class="shop-btn" id="buyClickerBtn">Buy</button>
+      </div>
+      <div class="shop-item">
+        <div class="shop-item-labels">
+          <span class="shop-rank">ClickerOP</span>
+          <span class="shop-cost">500 Clicks</span>
+        </div>
+        <button class="shop-btn" id="buyClickerOPBtn">Buy</button>
+      </div>
+      <div class="shop-item">
+        <div class="shop-item-labels">
+          <span class="shop-rank">ClickerGrinder</span>
+          <span class="shop-cost">1000 Clicks</span>
+        </div>
+        <button class="shop-btn" id="buyClickerGrinderBtn">Buy</button>
+      </div>
+      <div class="shop-inventory-title">Inventory</div>
+      <div class="shop-inventory" id="shopInventory">
+        <span class="shop-inv-rank equipped" data-rank="Member">Member</span>
+      </div>
+      <div class="shop-desc">
+        <b>Tip:</b> Equip a rank to show it above your clicker!
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    Made with <span style="color:#ff7380">❤</span> by the Hecker community
+  </div>
+  <script>
+    const countries = {
+      "US": "United States", "GB": "United Kingdom", "DE": "Germany",
+      "FR": "France", "JP": "Japan", "IN": "India", "BR": "Brazil", "CN": "China", "RU": "Russia", "CA": "Canada",
+      "AU": "Australia", "IT": "Italy", "ES": "Spain", "MX": "Mexico", "KR": "South Korea", "TR": "Turkey",
+      "ID": "Indonesia", "SA": "Saudi Arabia", "SE": "Sweden", "PL": "Poland", "NL": "Netherlands", "AR": "Argentina",
+      "ZA": "South Africa", "EG": "Egypt", "UA": "Ukraine", "TH": "Thailand", "PH": "Philippines", "PK": "Pakistan", "NG": "Nigeria",
+      "Unknown": "Unknown"
+    };
+
+    const countrySelect = document.getElementById('countrySelect');
+    for (const [code, name] of Object.entries(countries)) {
+      let option = document.createElement('option');
+      option.value = code;
+      option.textContent = name;
+      countrySelect.appendChild(option);
+    }
+    countrySelect.value = "US";
+    let localCount = 0;
+    let selectedCountry = countrySelect.value;
+    let globalCountDisplayed = 0;
+
+    // --- RANKS/STORE LOGIC ---
+    const ranks = [
+      { name: "Member", cost: 0 },
+      { name: "Clicker", cost: 100 },
+      { name: "ClickerOP", cost: 500 },
+      { name: "ClickerGrinder", cost: 1000 }
+    ];
+    let ownedRanks = ["Member"];
+    let equippedRank = "Member";
+    function updateCurrentRankLabel() {
+      document.getElementById('currentRankLabel').textContent = `${equippedRank}`;
+    }
+    document.getElementById('shopIcon').onclick = () => {
+      document.getElementById('shopModalBg').classList.add('active');
+      updateShopUI();
+    };
+    document.getElementById('shopCloseBtn').onclick = () => {
+      document.getElementById('shopModalBg').classList.remove('active');
+    };
+    document.getElementById('shopModalBg').onclick = (e) => {
+      if (e.target === document.getElementById('shopModalBg')) {
+        document.getElementById('shopModalBg').classList.remove('active');
+      }
+    };
+    function buyRank(rankName, cost) {
+      if (localCount >= cost && !ownedRanks.includes(rankName)) {
+        localCount -= cost;
+        ownedRanks.push(rankName);
+        equippedRank = rankName;
+        animateNumber(document.getElementById('localCount'), localCount);
+        updateShopUI();
+        updateInventory();
+        updateCurrentRankLabel();
+      }
+    }
+    document.getElementById('buyClickerBtn').onclick = function() {
+      if (ownedRanks.includes("Clicker")) {
+        equippedRank = "Clicker";
+        updateShopUI();
+        updateInventory();
+        updateCurrentRankLabel();
+      } else {
+        buyRank("Clicker", 100);
+      }
+    };
+    document.getElementById('buyClickerOPBtn').onclick = function() {
+      if (ownedRanks.includes("ClickerOP")) {
+        equippedRank = "ClickerOP";
+        updateShopUI();
+        updateInventory();
+        updateCurrentRankLabel();
+      } else {
+        buyRank("ClickerOP", 500);
+      }
+    };
+    document.getElementById('buyClickerGrinderBtn').onclick = function() {
+      if (ownedRanks.includes("ClickerGrinder")) {
+        equippedRank = "ClickerGrinder";
+        updateShopUI();
+        updateInventory();
+        updateCurrentRankLabel();
+      } else {
+        buyRank("ClickerGrinder", 1000);
+      }
+    };
+    function updateShopUI() {
+      document.querySelector('.shop-item .shop-btn.equipped').disabled = (equippedRank === "Member");
+      document.getElementById('buyClickerBtn').textContent =
+        ownedRanks.includes("Clicker") ? (equippedRank==="Clicker"?"Equipped":"Equip") : "Buy";
+      document.getElementById('buyClickerBtn').disabled =
+        ownedRanks.includes("Clicker") ? (equippedRank==="Clicker") : (localCount < 100);
+      document.getElementById('buyClickerOPBtn').textContent =
+        ownedRanks.includes("ClickerOP") ? (equippedRank==="ClickerOP"?"Equipped":"Equip") : "Buy";
+      document.getElementById('buyClickerOPBtn').disabled =
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Worldwide Click Counter v5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* --- Animated gradient and animated blobs --- */
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+      overflow-x: hidden;
+      position: relative;
+    }
+    .bg-blobs {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.4;
+      filter: blur(30px);
+      animation: moveBlobs 18s infinite alternate cubic-bezier(0.7,0.2,0.3,0.9);
+      will-change: transform;
+    }
+    .blob1 {
+      width: 420px; height: 420px;
+      background: linear-gradient(135deg, #ffd6e0 0%, #ffb86c 100%);
+      left: 5vw; top: 10vh;
+      animation-delay: 0s;
+    }
+    .blob2 {
+      width: 400px; height: 400px;
+      background: linear-gradient(135deg, #80ffea 0%, #8f94fb 100%);
+      left: 60vw; top: 30vh;
+      animation-delay: 4s;
+    }
+    .blob3 {
+      width: 340px; height: 340px;
+      background: linear-gradient(135deg, #b5fffc 0%, #ff61a6 100%);
+      left: 35vw; top: 70vh;
+      animation-delay: 8s;
+    }
+    @keyframes moveBlobs {
+      0% { transform: scale(1) translateY(0) translateX(0);}
+      40% { transform: scale(1.08) translateY(-30px) translateX(60px);}
+      70% { transform: scale(0.95) translateY(40px) translateX(-60px);}
+      100% { transform: scale(1.05) translateY(-10px) translateX(30px);}
+    }
+    .counter-card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.93);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.22);
+      border-radius: 28px;
+      padding: 2.5rem 2.5rem 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 320px;
+      max-width: 95vw;
+      margin: 1rem auto 2.2rem auto;
+      animation: fadeIn 1.3s cubic-bezier(0.35, 0.85, 0.35, 1.2);
+      z-index: 1;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px) scale(0.96);}
+      to { opacity: 1; transform: translateY(0) scale(1);}
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      color: #4e54c8;
+      text-shadow: 1px 2px 7px rgba(80,80,180,0.1);
+      letter-spacing: 1px;
+      animation: fadeIn 1.1s 0.15s both;
+    }
+    .current-rank {
+      font-size: 1.17rem;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(90deg,#4e54c8 50%,#8f94fb 100%);
+      padding: 0.5em 1.5em;
+      border-radius: 16px;
+      margin-bottom: 0.9em;
+      margin-top: 0.2em;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px #8f94fb44;
+      animation: fadeIn 1s cubic-bezier(0.3,1,0.5,1.2);
+      transition: background 0.3s;
+      display: inline-block;
+    }
+    .counter-value, .count-num {
+      font-size: 2.7rem;
+      font-weight: bold;
+      color: #222;
+      margin: 0.7rem 0 0.2rem 0;
+      letter-spacing: 2px;
+      text-align: center;
+      text-shadow: 0 2px 8px rgba(80,80,180,0.08);
+      user-select: all;
+      transition: color 0.2s;
+    }
+    .counter-label {
+      font-size: 1.1rem;
+      color: #6a6fc8;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin-top: 1.2rem;
+      animation: fadeIn 1.1s 0.45s both;
+    }
+    #clickBtn {
+      background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 999px;
+      padding: 0.9em 2.2em;
+      margin: 1.25rem 0 1.8rem 0;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(80,80,180,0.10);
+      transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+      outline: none;
+      animation: btnPopIn 0.75s 0.12s both cubic-bezier(0.3,0.8,0.5,1.2);
+      position: relative;
+      z-index: 9;
+    }
+    @keyframes btnPopIn {
+      from { opacity: 0; transform: scale(0.7);}
+      to { opacity: 1; transform: scale(1);}
+    }
+    #clickBtn:active {
+      animation: btnPulse 0.3s;
+    }
+    @keyframes btnPulse {
+      0% { transform: scale(1);}
+      55% { transform: scale(1.13);}
+      100% { transform: scale(1);}
+    }
+    #clickBtn:hover, #clickBtn:focus {
+      background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 8px 18px rgba(80,80,180,0.18);
+    }
+    .counts-container {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    .count-box {
+      background: rgba(200, 210, 255, 0.13);
+      border-radius: 14px;
+      padding: 1rem 1.5rem;
+      min-width: 120px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(150,150,200,0.07);
+      transition: background 0.4s;
+      animation: fadeIn 1.2s 0.3s both;
+    }
+    .count-title {
+      font-size: 1rem;
+      color: #4e54c8;
+      margin-bottom: 0.18rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    .count-num {
+      font-size: 1.7rem;
+      font-family: monospace;
+      color: #333;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+    .your-country {
+      color: #6a6fc8;
+      font-size: 1.08rem;
+      margin-top: 0.3rem;
+      text-align: center;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      animation: fadeIn 1.2s 0.22s both;
+    }
+    .leaderboard, .countries-table {
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+      background: rgba(255,255,255,0.90);
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(50,50,100,0.07);
+      overflow: hidden;
+      animation: fadeIn 1.3s 0.5s both;
+    }
+    .leaderboard-title {
+      background: #4e54c8;
+      color: #fff;
+      font-weight: bold;
+      padding: 0.6rem 1.2rem;
+      font-size: 1.15rem;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+    }
+    th, td {
+      padding: 0.55rem 0.7rem;
+      text-align: left;
+      transition: background 0.2s;
+    }
+    th {
+      background: #f0f1fa;
+      color: #4e54c8;
+    }
+    tr:nth-child(even) { background: #f9fafd; }
+    tr { transition: background 0.3s; }
+    tr:hover { background: #f0ebff; }
+    .country-select {
+      margin-bottom: 1.3rem;
+      font-size: 1.08rem;
+      padding: 0.3em 1em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      box-shadow: 0 1px 3px rgba(60,60,120,0.07);
+      background: #fff;
+      color: #454545;
+      transition: border 0.2s;
+    }
+    .country-select:focus {
+      border: 1.5px solid #4e54c8;
+      box-shadow: 0 2px 7px #8f94fb55;
+    }
+    .footer {
+      margin-top: 2.3rem;
+      color: #f7f7fb;
+      font-size: 1rem;
+      text-align: center;
+      opacity: 0.93;
+      text-shadow: 0 1px 6px rgba(31, 38, 135, 0.22);
+      z-index: 2;
+      position: relative;
+      animation: fadeIn 1.6s 0.7s both;
+    }
+    /* --- SHOP ICON & MODAL --- */
+    .shop-icon {
+      position: absolute;
+      top: 6px;
+      right: 16px;
+      width: 38px;
+      height: 38px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(80,80,180,0.11);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 30;
+      transition: box-shadow 0.2s, background 0.2s;
+      border: 2px solid #4e54c8;
+    }
+    .shop-icon:hover {
+      box-shadow: 0 8px 18px #8f94fb55;
+      background: #f7f7fb;
+    }
+    .shop-icon svg { width: 24px; height: 24px; fill: #4e54c8; }
+    .shop-modal-bg {
+      position: fixed;
+      z-index: 40;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(60,70,140,0.20);
+      display: none;
+      align-items: center; justify-content: center;
+      animation: fadeIn 0.3s;
+    }
+    .shop-modal-bg.active { display: flex; }
+    .shop-modal {
+      background: #fff;
+      border-radius: 22px;
+      box-shadow: 0 14px 60px #4e54c825;
+      padding: 2rem 1.5rem 1.6rem 1.5rem;
+      min-width: 310px;
+      max-width: 94vw;
+      animation: fadeIn 0.4s;
+      position: relative;
+    }
+    .shop-close {
+      position: absolute;
+      top: 9px; right: 13px;
+      font-size: 1.4em;
+      color: #4e54c8;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+      background: none;
+      transition: color 0.16s;
+    }
+    .shop-close:hover { color: #ff4d6d; }
+    .shop-title {
+      font-size: 1.43rem;
+      font-weight: bold;
+      color: #4e54c8;
+      margin-bottom: 1.2rem;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .shop-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1em;
+      border-bottom: 1px solid #ecebff;
+      padding-bottom: 0.7em;
+    }
+    .shop-item:last-child { border-bottom: none; }
+    .shop-item-labels {
+      display: flex; flex-direction: column;
+    }
+    .shop-rank {
+      font-weight: bold;
+      font-size: 1.12em;
+      color: #4e54c8;
+    }
+    .shop-cost {
+      font-size: 0.98em;
+      color: #888;
+      font-style: italic;
+      margin-top: 2px;
+    }
+    .shop-btn {
+      padding: 0.50em 1.1em;
+      border-radius: 8px;
+      border: none;
+      background: #4e54c8;
+      color: #fff;
+      font-weight: 500;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      margin-left: 1em;
+    }
+    .shop-btn[disabled] { background: #aaa; cursor: not-allowed; }
+    .shop-btn.equipped {
+      background: #8f94fb;
+      color: #222;
+      cursor: pointer;
+      font-weight: bold;
+      border: 1.5px solid #4e54c8;
+    }
+    .shop-inventory-title {
+      color: #4e54c8;
+      font-weight: 500;
+      margin-top: 1.6em;
+      margin-bottom: 0.4em;
+      font-size: 1.08em;
+    }
+    .shop-inventory {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7em;
+      margin-bottom: 0.4em;
+    }
+    .shop-inv-rank {
+      background: #f0f1fa;
+      color: #4e54c8;
+      font-weight: 520;
+      border-radius: 7px;
+      padding: 0.26em 0.9em;
+      font-size: 1em;
+      border: 1.5px solid #8f94fb;
+      cursor: pointer;
+      transition: background 0.13s, color 0.13s;
+    }
+    .shop-inv-rank.equipped {
+      background: #4e54c8;
+      color: #fff;
+      border: 2.5px solid #8f94fb;
+    }
+    .shop-desc {
+      font-size: 0.98em;
+      color: #555;
+      margin-bottom: 0.18em;
+    }
+    @media (max-width: 600px) {
+      .counter-card { padding: 1.2rem; }
+      h1 { font-size: 1.3rem; }
+      .counter-value { font-size: 1.5rem; }
+      #clickBtn { font-size: 1rem; padding: 0.7em 1.4em; }
+      .counts-container { gap: 1rem; }
+      .footer { font-size: 0.85rem; }
+      .leaderboard, .countries-table { font-size: 0.87rem; }
+      th, td { padding: 0.33rem 0.4rem; }
+      .shop-modal { min-width: 92vw; }
+      .shop-icon { right: 8px; top: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated Blobs -->
+  <div class="bg-blobs">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+  </div>
+  <div class="counter-card">
+    <h1>Worldwide Click Counter v5 🌐</h1>
+    <label>
+      <span style="color:#4e54c8;font-weight:500;">Select your country:</span>
+      <select id="countrySelect" class="country-select"></select>
+    </label>
+    <span class="current-rank" id="currentRankLabel"></span>
+    <button id="clickBtn">Click me!</button>
+    <div class="your-country" id="yourCountry"></div>
+    <div class="counts-container">
+      <div class="count-box">
+        <div class="count-title">Your Clicks</div>
+        <div class="count-num" id="localCount">0</div>
+      </div>
+      <div class="count-box">
+        <div class="count-title">Global Clicks</div>
+        <div class="count-num" id="globalCount">...</div>
+      </div>
+    </div>
+    <div class="counter-label">Every click you make is added to your country and the global total. 🌍</div>
+    <div class="shop-icon" id="shopIcon" title="Open Shop" style="position:absolute;top:10px;right:10px;">
+      <svg viewBox="0 0 24 24"><path d="M7 7V6a5 5 0 0 1 10 0v1h2a1 1 0 0 1 1 1v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a1 1 0 0 1 1-1h2zm2 0h6V6a3 3 0 0 0-6 0v1zm-4 2v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9H5z"/></svg>
+    </div>
+  </div>
+  <div class="leaderboard">
+    <div class="leaderboard-title">🌏 Top 20 Countries</div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Country</th><th>Clicks</th></tr>
+      </thead>
+      <tbody id="leaderboardBody"></tbody>
+    </table>
+  </div>
+  <div class="countries-table">
+    <div class="leaderboard-title">All Countries</div>
+    <table>
+      <thead>
+        <tr><th>Country</th><th>Clicks</th></tr>
+      </thead>
+      <tbody id="countriesBody"></tbody>
+    </table>
+  </div>
+  <div class="shop-modal-bg" id="shopModalBg">
+    <div class="shop-modal">
+      <button class="shop-close" id="shopCloseBtn">&times;</button>
+      <div class="shop-title">🛒 Ranks Store</div>
+      <div class="shop-item">
+        <div class="shop-item-labels">
+          <span class="shop-rank">Member</span>
+          <span class="shop-cost">Free (already owned)</span>
+        </div>
+        <button class="shop-btn equipped" disabled>Equipped</button>
+      </div>
+      <div class="shop-item">
+        <div class="shop-item-labels">
+          <span class="shop-rank">Clicker</span>
+          <span class="shop-cost">100 Clicks</span>
+        </div>
+        <button class="shop-btn" id="buyClickerBtn">Buy</button>
+      </div>
+      <div class="shop-item">
+        <div class="shop-item-labels">
+          <span class="shop-rank">ClickerOP</span>
+          <span class="shop-cost">500 Clicks</span>
+        </div>
+        <button class="shop-btn" id="buyClickerOPBtn">Buy</button>
+      </div>
+      <div class="shop-item">
+        <div class="shop-item-labels">
+          <span class="shop-rank">ClickerGrinder</span>
+          <span class="shop-cost">1000 Clicks</span>
+        </div>
+        <button class="shop-btn" id="buyClickerGrinderBtn">Buy</button>
+      </div>
+      <div class="shop-inventory-title">Inventory</div>
+      <div class="shop-inventory" id="shopInventory">
+        <span class="shop-inv-rank equipped" data-rank="Member">Member</span>
+      </div>
+      <div class="shop-desc">
+        <b>Tip:</b> Equip a rank to show it above your clicker!
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    Made with <span style="color:#ff7380">❤</span> by the Hecker community
+  </div>
+  <script>
+    const countries = {
+      "US": "United States", "GB": "United Kingdom", "DE": "Germany",
+      "FR": "France", "JP": "Japan", "IN": "India", "BR": "Brazil", "CN": "China", "RU": "Russia", "CA": "Canada",
+      "AU": "Australia", "IT": "Italy", "ES": "Spain", "MX": "Mexico", "KR": "South Korea", "TR": "Turkey",
+      "ID": "Indonesia", "SA": "Saudi Arabia", "SE": "Sweden", "PL": "Poland", "NL": "Netherlands", "AR": "Argentina",
+      "ZA": "South Africa", "EG": "Egypt", "UA": "Ukraine", "TH": "Thailand", "PH": "Philippines", "PK": "Pakistan", "NG": "Nigeria",
+      "Unknown": "Unknown"
+    };
+
+    const countrySelect = document.getElementById('countrySelect');
+    for (const [code, name] of Object.entries(countries)) {
+      let option = document.createElement('option');
+      option.value = code;
+      option.textContent = name;
+      countrySelect.appendChild(option);
+    }
+    countrySelect.value = "US";
+    let localCount = 0;
+    let selectedCountry = countrySelect.value;
+    let globalCountDisplayed = 0;
+
+    // --- RANKS/STORE LOGIC ---
+    const ranks = [
+      { name: "Member", cost: 0 },
+      { name: "Clicker", cost: 100 },
+      { name: "ClickerOP", cost: 500 },
+      { name: "ClickerGrinder", cost: 1000 }
+    ];
+    let ownedRanks = ["Member"];
+    let equippedRank = "Member";
+    function updateCurrentRankLabel() {
+      document.getElementById('currentRankLabel').textContent = `${equippedRank}`;
+    }
+    document.getElementById('shopIcon').onclick = () => {
+      document.getElementById('shopModalBg').classList.add('active');
+      updateShopUI();
+    };
+    document.getElementById('shopCloseBtn').onclick = () => {
+      document.getElementById('shopModalBg').classList.remove('active');
+    };
+    document.getElementById('shopModalBg').onclick = (e) => {
+      if (e.target === document.getElementById('shopModalBg')) {
+        document.getElementById('shopModalBg').classList.remove('active');
+      }
+    };
+    function buyRank(rankName, cost) {
+      if (localCount >= cost && !ownedRanks.includes(rankName)) {
+        localCount -= cost;
+        ownedRanks.push(rankName);
+        equippedRank = rankName;
+        animateNumber(document.getElementById('localCount'), localCount);
+        updateShopUI();
+        updateInventory();
+        updateCurrentRankLabel();
+      }
+    }
+    document.getElementById('buyClickerBtn').onclick = function() {
+      if (ownedRanks.includes("Clicker")) {
+        equippedRank = "Clicker";
+        updateShopUI();
+        updateInventory();
+        updateCurrentRankLabel();
+      } else {
+        buyRank("Clicker", 100);
+      }
+    };
+    document.getElementById('buyClickerOPBtn').onclick = function() {
+      if (ownedRanks.includes("ClickerOP")) {
+        equippedRank = "ClickerOP";
+        updateShopUI();
+        updateInventory();
+        updateCurrentRankLabel();
+      } else {
+        buyRank("ClickerOP", 500);
+      }
+    };
+    document.getElementById('buyClickerGrinderBtn').onclick = function() {
+      if (ownedRanks.includes("ClickerGrinder")) {
+        equippedRank = "ClickerGrinder";
+        updateShopUI();
+        updateInventory();
+        updateCurrentRankLabel();
+      } else {
+        buyRank("ClickerGrinder", 1000);
+      }
+    };
+    function updateShopUI() {
+      document.querySelector('.shop-item .shop-btn.equipped').disabled = (equippedRank === "Member");
+      document.getElementById('buyClickerBtn').textContent =
+        ownedRanks.includes("Clicker") ? (equippedRank==="Clicker"?"Equipped":"Equip") : "Buy";
+      document.getElementById('buyClickerBtn').disabled =
+        ownedRanks.includes("Clicker") ? (equippedRank==="Clicker") : (localCount < 100);
+      document.getElementById('buyClickerOPBtn').textContent =
+        ownedRanks.includes("ClickerOP") ? (equippedRank==="ClickerOP"?"Equipped":"Equip") : "Buy";
+      document.getElementById('buyClickerOPBtn').disabled =
+        ownedRanks.includes("ClickerOP") ? (equippedRank==="ClickerOP") : (localCount < 500);
+      document.getElementById('buyClickerGrinderBtn').textContent =
+        ownedRanks.includes("ClickerGrinder") ? (equippedRank==="ClickerGrinder"?"Equipped":"Equip") : "Buy";
+      document.getElementById('buyClickerGrinderBtn').disabled =
+        ownedRanks.includes("ClickerGrinder") ? (equippedRank==="ClickerGrinder") : (localCount < 1000);
+      updateInventory();
+    }
+    function updateInventory() {
+      const inv = document.getElementById('shopInventory');
+      inv.innerHTML = '';
+      ownedRanks.forEach(r => {
+        const span = document.createElement('span');
+        span.className = 'shop-inv-rank' + (equippedRank === r ? ' equipped':'');
+        span.textContent = r;
+        span.onclick = () => {
+          equippedRank = r;
+          updateShopUI();
+          updateCurrentRankLabel();
+        };
+        inv.appendChild(span);
+      });
+    }
+    function animateNumber(elem, to, duration=600) {
+      let from = Number(elem.textContent.replace(/[^\d]/g,'') || 0);
+      if (from === to) return;
+      let start = null;
+      function step(ts) {
+        if (!start) start = ts;
+        let progress = Math.min((ts         ownedRanks.includes("ClickerOP") ? (equippedRank==="ClickerOP") : (localCount < 500);
+      document.getElementById('buyClickerGrinderBtn').textContent =
+        ownedRanks.includes("ClickerGrinder") ? (equippedRank==="ClickerGrinder"?"Equipped":"Equip") : "Buy";
+      document.getElementById('buyClickerGrinderBtn').disabled =
+        ownedRanks.includes("ClickerGrinder") ? (equippedRank==="ClickerGrinder") : (localCount < 1000);
+      updateInventory();
+    }
+    function updateInventory() {
+      const inv = document.getElementById('shopInventory');
+      inv.innerHTML = '';
+      ownedRanks.forEach(r => {
+        const span = document.createElement('span');
+        span.className = 'shop-inv-rank' + (equippedRank === r ? ' equipped':'');
+        span.textContent = r;
+        span.onclick = () => {
+          equippedRank = r;
+          updateShopUI();
+          updateCurrentRankLabel();
+        };
+        inv.appendChild(span);
+      });
+    }
+    function animateNumber(elem, to, duration=600) {
+      let from = Number(elem.textContent.replace(/[^\d]/g,'') || 0);
+      if (from === to) return;
+      let start = null;
+      function step(ts) {
+        if (!start) start = ts;
+        let progress = Math.min((ts
